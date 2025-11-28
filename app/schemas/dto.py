@@ -25,6 +25,8 @@ class TaskDTO(BaseModel):
     sla_id: str
     type_id: str
     departament_id: str
+    point_id: str
+    text_id: str
     attached_id: str
 
 
@@ -41,3 +43,24 @@ class UserDTO(BaseModel):
     name: str
     departament_id: str
     position_id: str
+
+
+class PointDTO(BaseModel):
+    id: str
+    point: str
+    text_id: str
+
+
+class TextDTO(BaseModel):
+    id: str
+    text: str
+    author_id: str
+
+
+class AuthorDTO(BaseModel):
+    id: str
+    email: str
+    name: str
+    description: str
+    contact: str
+
