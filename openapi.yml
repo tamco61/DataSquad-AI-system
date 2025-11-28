@@ -1,0 +1,303 @@
+openapi: 3.0.3
+info:
+  title: Correspondence Automation MVP API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+paths:
+
+  ###############################################
+  # INGESTION SERVICE
+  ###############################################
+
+  /ingest/message:
+    post:
+      summary: Ingest a text message for analysis and task creation
+      tags: [Ingestion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, text]
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+                assignee_id:
+                  type: string
+                  format: uuid
+      responses:
+        200:
+          description: Message ingested and task created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+
+
+  ###############################################
+  # AI ANALYSIS SERVICE
+  ###############################################
+
+  /ai/analyze:
+    post:
+      summary: Analyze a message with AI and return classification/summary/SLA
+      tags: [AI Analysis]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+      responses:
+        200:
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  classification:
+                    type: string
+                  summary:
+                    type: string
+                  risk_level:
+                    type: string
+                  sla_deadline:
+                    type: string
+                    format: date-time
+
+  ###############################################
+  # DRAFT GENERATION SERVICE
+  ###############################################
+
+  /draft/generate:
+    post:
+      summary: Generate answer drafts for a task
+      tags: [Draft Generation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [task_id]
+              properties:
+                task_id:
+                  type: string
+                  format: uuid
+      responses:
+        200:
+          description: Drafts generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        style:
+                          type: string
+                        content:
+                          type: string
+
+
+  ###############################################
+  # WORKFLOW SERVICE - USERS
+  ###############################################
+
+  /workflow/users:
+    post:
+      summary: Create user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, name, role]
+              properties:
+                email:
+                  type: string
+                name:
+                  type: string
+                departament:
+                  type: string
+      responses:
+        200:
+          description: User created
+
+    get:
+      summary: List all users
+      tags: [Users]
+      responses:
+        200:
+          description: Users list
+
+  /workflow/users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: User info
+
+  ###############################################
+  # WORKFLOW SERVICE - TASKS
+  ###############################################
+
+  /workflow/tasks:
+    post:
+      summary: Create a task manually
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, raw_text]
+              properties:
+                title:
+                  type: string
+                raw_text:
+                  type: string
+                classification:
+                  type: string
+                summary:
+                  type: string
+                assignee_id:
+                  type: string
+                  format: uuid
+      responses:
+        200:
+          description: Task created
+
+    get:
+      summary: List tasks with filtering
+      tags: [Tasks]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: assignee_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: List of tasks
+
+  /workflow/tasks/{id}:
+    get:
+      summary: Get task by ID
+      tags: [Tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Task result
+
+    patch:
+      summary: Update task (status, assignee)
+      tags: [Tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                assignee_id:
+                  type: string
+                  format: uuid
+      responses:
+        200:
+          description: Updated
+
+  ###############################################
+  # ANALYTICS SERVICE
+  ###############################################
+
+  /analytics/summary:
+    get:
+      summary: Get global analytics summary
+      tags: [Analytics]
+      responses:
+        200:
+          description: Summary metrics
+
+  /analytics/tasks-by-classification:
+    get:
+      summary: Distribution of tasks by classification
+      tags: [Analytics]
+      responses:
+        200:
+          description: Classification metrics
+
+  /analytics/sla:
+    get:
+      summary: SLA analytics
+      tags: [Analytics]
+      responses:
+        200:
+          description: SLA data
+
+  /analytics/user/{id}:
+    get:
+      summary: User-specific analytics
+      tags: [Analytics]
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: User analytics
