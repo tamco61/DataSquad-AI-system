@@ -175,6 +175,7 @@ paths:
   # WORKFLOW SERVICE - TASKS
   ###############################################
 
+ 
   /workflow/tasks:
     post:
       summary: Create a task manually
@@ -189,35 +190,72 @@ paths:
               properties:
                 title:
                   type: string
+                  example: "Customer request"
                 raw_text:
                   type: string
+                  example: "Full email body or text"
                 classification:
                   type: string
                 summary:
                   type: string
+                risk_level:
+                  type: string
+                  enum: [low, medium, high]
                 assignee_id:
                   type: string
                   format: uuid
+                addressed_id:
+                  type: string
+                  format: uuid
+                status:
+                  type: string
+                  enum: [new, in_progress, wait_approval, done]
+                sla_deadline:
+                  type: string
+                  format: date-time
       responses:
-        200:
+        201:
           description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
 
     get:
-      summary: List tasks with filtering
+      summary: List tasks (with filtering)
       tags: [Tasks]
       parameters:
         - name: status
           in: query
+          description: Filter by task status
           schema:
             type: string
+            enum: [new, in_progress, wait_approval, done]
+
         - name: assignee_id
           in: query
+          description: Filter by assigned operator
           schema:
             type: string
             format: uuid
+
+        - name: risk_level
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high]
+
       responses:
         200:
           description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
 
   /workflow/tasks/{id}:
     get:
@@ -233,9 +271,16 @@ paths:
       responses:
         200:
           description: Task result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        404:
+          description: Task not found
+
 
     patch:
-      summary: Update task (status, assignee)
+      summary: Update task (status, assignee, addressing, AI results)
       tags: [Tasks]
       parameters:
         - name: id
@@ -244,6 +289,7 @@ paths:
           schema:
             type: string
             format: uuid
+
       requestBody:
         required: true
         content:
@@ -253,12 +299,35 @@ paths:
               properties:
                 status:
                   type: string
+                  enum: [new, in_progress, wait_approval, done]
                 assignee_id:
                   type: string
                   format: uuid
+                addressed_id:
+                  type: string
+                  format: uuid
+                classification:
+                  type: string
+                summary:
+                  type: string
+                risk_level:
+                  type: string
+                  enum: [low, medium, high]
+                sla_deadline:
+                  type: string
+                  format: date-time
+                resolved_at:
+                  type: string
+                  format: date-time
+
       responses:
         200:
-          description: Updated
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
 
   ###############################################
   # ANALYTICS SERVICE
@@ -301,3 +370,4 @@ paths:
       responses:
         200:
           description: User analytics
+
