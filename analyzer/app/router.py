@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from .schemas import AnalyzeRequest, AnalyzeResponse
 from .services import analyze_message
-from .dependencies import get_api_key
 
 router = APIRouter(tags=["AI Analysis"])
 
