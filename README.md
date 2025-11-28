@@ -9,7 +9,7 @@
 Заполнение
 .env
 ```folder_id, api_key```
-Запуск сервиса
+Запуск сервиса из папки mvp
 ```uvicorn app.main:app --reload --host 0.0.0.0 --port 8001```
 
 ## Пример работы
