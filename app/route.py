@@ -26,5 +26,3 @@ async def add_user(payload):
 @router.get("/user", response_model=None)
 async def get_user(payload):
     pass
-
-@router
